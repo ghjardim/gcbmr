@@ -53,3 +53,21 @@ plt.show()
 
 print("Number of elements equal to zero:", np.count_nonzero(adjacency_matrix == 0))
 print("Number of elements not equal to zero:", np.count_nonzero(adjacency_matrix != 0))
+
+# Clustering
+from sklearn.cluster import KMeans
+
+num_clusters = 10  # Adjust as needed
+kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=20)
+cluster_labels = kmeans.fit_predict(adjacency_matrix)
+
+for node, label in enumerate(cluster_labels):
+    G.nodes[node]['cluster'] = label
+
+colors = [G.nodes[node]['cluster'] for node in G.nodes]
+nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=20, font_size=8, width=0.5, node_color=colors, cmap=plt.cm.viridis)
+plt.show()
+
+cluster_counts = pd.Series(cluster_labels).value_counts().sort_index()
+print("Number of nodes in each cluster:")
+print(cluster_counts)
