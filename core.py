@@ -68,6 +68,15 @@ def get_recommended_movies_tfidf(target_movie_index, movie_similarities, movies_
     movie_indices = similarity_scores.sort_values("score", ascending=False)[1:11].index
     return movies_df['Series_Title'].iloc[movie_indices]
 
+def get_movie_cluster(movie_title, movie_indices, G):
+    movie_index = movie_indices.get(movie_title)
+
+    if movie_index is not None and movie_index in G.nodes:
+        return G.nodes[movie_index].get('cluster', None)
+    else:
+        print(f"Movie '{movie_title}' not found or not present in the graph.")
+        return None
+
 if __name__ == "__main__":
     data = load_data("./dataset/imdb_top_1000.csv")
 
@@ -91,3 +100,6 @@ if __name__ == "__main__":
     recommended_movies = get_recommended_movies_tfidf(target_movie_index, cosine_sim, data)
     print(f"\nRecommended movies for '{target_movie}':\n{recommended_movies}")
 
+    movie_cluster = get_movie_cluster(target_movie, movie_indices, G)
+    if movie_cluster is not None:
+        print(f"The cluster of the movie '{target_movie}' is: {movie_cluster}")
