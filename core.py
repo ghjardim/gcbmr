@@ -77,6 +77,15 @@ def get_movie_cluster(movie_title, movie_indices, G):
         print(f"Movie '{movie_title}' not found or not present in the graph.")
         return None
 
+def get_movies_in_cluster(cluster_number, G):
+    cluster_indices = [node for node, data in G.nodes(data=True) if data.get('cluster') == cluster_number]
+
+    if not cluster_indices:
+        print(f"No movies found in cluster {cluster_number}.")
+        return None
+
+    return cluster_indices
+
 if __name__ == "__main__":
     data = load_data("./dataset/imdb_top_1000.csv")
 
@@ -103,3 +112,9 @@ if __name__ == "__main__":
     movie_cluster = get_movie_cluster(target_movie, movie_indices, G)
     if movie_cluster is not None:
         print(f"The cluster of the movie '{target_movie}' is: {movie_cluster}")
+
+    movies_in_cluster = get_movies_in_cluster(movie_cluster, G)
+    if movies_in_cluster is not None:
+        print(f"Movies in Cluster {movie_cluster}:\n{movies_in_cluster}")
+        num_movies = len(movies_in_cluster)
+        print(f"They're {num_movies}")
