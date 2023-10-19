@@ -25,7 +25,7 @@ def create_graph(cosine_sim):
 
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
-            if cosine_sim[i, j] > 0:
+            if cosine_sim[i, j] > 0.1:
                 similarity_weight = cosine_sim[i, j]
                 G.add_edge(i, j, weight=similarity_weight)
 
