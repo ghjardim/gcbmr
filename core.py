@@ -32,8 +32,7 @@ def get_recommended_movies_tfidf(target_movie_index, movie_similarities,movies_d
     return data['Series_Title'].iloc[movie_indices]
 
 # Creating adjacency matrix
-threshold = 0.5
-adjacency_matrix = np.where(cosine_sim > threshold, 1, 0)
+adjacency_matrix = cosine_sim
 
 # Creating the graph
 G = nx.Graph()
@@ -52,5 +51,5 @@ labels = nx.get_edge_attributes(G, 'weight')
 nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_size=8)
 plt.show()
 
-print(get_films_by_name('Lord of the Rings', indices))
-print(get_recommended_movies_tfidf(5, cosine_sim, data))
+print("Number of elements equal to zero:", np.count_nonzero(adjacency_matrix == 0))
+print("Number of elements not equal to zero:", np.count_nonzero(adjacency_matrix != 0))
