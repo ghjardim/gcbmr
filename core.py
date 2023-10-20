@@ -56,10 +56,6 @@ def perform_clustering(G, num_clusters=10):
     colors = [G.nodes[node]['cluster'] for node in G.nodes]
     visualize_graph(G, colors=colors)
 
-    cluster_counts = pd.Series(cluster_labels).value_counts().sort_index()
-    print("Number of nodes in each cluster:")
-    print(cluster_counts)
-
 def get_films_by_name(movie_name, movie_indices):
     return movie_indices[movie_indices.index.str.contains(movie_name, na=False)]
 
@@ -86,28 +82,24 @@ def get_movies_in_cluster(cluster_number, G):
 
     return cluster_indices
 
-if __name__ == "__main__":
-    data = load_data("./dataset/imdb_top_1000.csv")
+def create_cluster_subgraph(G, cluster_number):
+    cluster_indices = [node for node, data in G.nodes(data=True) if data.get('cluster') == cluster_number]
 
-    tfidf_matrix = calculate_tfidf_matrix(data)
-    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+    if not cluster_indices:
+        print(f"No nodes found in cluster {cluster_number}. Returning an empty subgraph.")
+        return nx.Graph()
 
-    G = create_graph(cosine_sim)
-    visualize_graph(G)
+    # Create a subgraph with nodes and edges only from the specified cluster
+    subgraph = G.subgraph(cluster_indices)
 
-    perform_clustering(G)
+    return subgraph
 
-    # Example usage of get_films_by_name and get_recommended_movies_tfidf
+def analyse():
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
     movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
 
     target_movie = "Inception"
-    films_by_name = get_films_by_name(target_movie, movie_indices)
-    print(f"Films containing '{target_movie}':\n{films_by_name}")
-
     target_movie_index = movie_indices[target_movie]
-    recommended_movies = get_recommended_movies_tfidf(target_movie_index, cosine_sim, data)
-    print(f"\nRecommended movies for '{target_movie}':\n{recommended_movies}")
 
     movie_cluster = get_movie_cluster(target_movie, movie_indices, G)
     if movie_cluster is not None:
@@ -115,6 +107,30 @@ if __name__ == "__main__":
 
     movies_in_cluster = get_movies_in_cluster(movie_cluster, G)
     if movies_in_cluster is not None:
-        print(f"Movies in Cluster {movie_cluster}:\n{movies_in_cluster}")
+        print(f"Movies in Cluster {movie_cluster}: {movies_in_cluster}", end="")
         num_movies = len(movies_in_cluster)
-        print(f"They're {num_movies}")
+        print(f" -> {num_movies}")
+
+    print("Movie " + target_movie + " has the following neighbours: " + str(list(G.neighbors(target_movie_index))))
+    print("Movie " + target_movie + " has the following neighbours in cluster " + str(movie_cluster) + ": " + str(list(create_cluster_subgraph(G, movie_cluster).neighbors(target_movie_index))))
+    print("Movie " + target_movie + " got the following TF-IDF recommended movies: " + str(sorted(get_recommended_movies_tfidf(target_movie_index, cosine_sim, data).index.tolist())))
+
+    print("Graph: Connected components:\t" + str(len(list(nx.connected_components(G)))))
+    for cluster in range(0,10):
+        cluster_subgraph = create_cluster_subgraph(G, cluster)
+        #visualize_graph(cluster_subgraph)
+        print("Cluster " + str(cluster)
+              + "\tConnected components:" + str(len(list(nx.connected_components(cluster_subgraph))))
+              + "\tNodes:" + str(cluster_subgraph.number_of_nodes()))
+
+if __name__ == "__main__":
+    data = load_data("./dataset/imdb_top_1000.csv")
+
+    tfidf_matrix = calculate_tfidf_matrix(data)
+    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+    G = create_graph(cosine_sim)
+
+    perform_clustering(G)
+
+    analyse()
