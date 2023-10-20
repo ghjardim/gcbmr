@@ -45,7 +45,8 @@ def visualize_graph(G, pos=None, colors=None):
 
     plt.show()
 
-def perform_clustering(G, adjacency_matrix, num_clusters=10):
+def perform_clustering(G, num_clusters=10):
+    adjacency_matrix = nx.adjacency_matrix(G).toarray()
     kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=20)
     cluster_labels = kmeans.fit_predict(adjacency_matrix)
 
@@ -94,7 +95,7 @@ if __name__ == "__main__":
     G = create_graph(cosine_sim)
     visualize_graph(G)
 
-    perform_clustering(G, cosine_sim)
+    perform_clustering(G)
 
     # Example usage of get_films_by_name and get_recommended_movies_tfidf
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
