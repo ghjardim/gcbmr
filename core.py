@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
@@ -12,11 +13,19 @@ def load_data(file_path):
     data.drop(columns=columns_to_remove, inplace=True)
     return data
 
-def calculate_tfidf_matrix(text_data):
+def calculate_overview_matrix(text_data):
     tfidf = TfidfVectorizer(stop_words='english')
     text_data['Overview'] = text_data['Overview'].fillna('')
     tfidf_matrix = tfidf.fit_transform(text_data['Overview'])
-    return tfidf_matrix
+    overview_similarity = cosine_similarity(tfidf_matrix)
+    return overview_similarity
+
+def calculate_genre_matrix(text_data):
+    genres = text_data['Genre'].str.split(', ')
+    mlb = MultiLabelBinarizer()
+    genre_matrix = pd.DataFrame(mlb.fit_transform(genres), columns=mlb.classes_, index=text_data.index)
+    genre_similarity = cosine_similarity(genre_matrix)
+    return genre_similarity
 
 def create_graph(cosine_sim):
     G = nx.from_numpy_array(cosine_sim)
@@ -108,7 +117,7 @@ def analyse():
 
     print("Movie " + target_movie + " has the following neighbours: " + str(list(G.neighbors(target_movie_index))))
     print("Movie " + target_movie + " has the following neighbours in cluster " + str(movie_cluster) + ": " + str(list(create_cluster_subgraph(G, movie_cluster).neighbors(target_movie_index))))
-    print("Movie " + target_movie + " got the following TF-IDF recommended movies: " + str(sorted(get_recommended_movies_tfidf(target_movie_index, cosine_sim, data).index.tolist())))
+    print("Movie " + target_movie + " got the following Overview TF-IDF recommended movies: " + str(sorted(get_recommended_movies_tfidf(target_movie_index, overview_matrix, data).index.tolist())))
 
     print("Graph: Connected components:\t" + str(len(list(nx.connected_components(G)))))
     for cluster in range(0,10):
@@ -121,10 +130,10 @@ def analyse():
 if __name__ == "__main__":
     data = load_data("./dataset/imdb_top_1000.csv")
 
-    tfidf_matrix = calculate_tfidf_matrix(data)
-    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+    overview_matrix = calculate_overview_matrix(data)
+    genre_matrix = calculate_genre_matrix(data)
 
-    G = create_graph(cosine_sim)
+    G = create_graph(genre_matrix)
 
     perform_clustering(G)
 
