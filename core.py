@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.preprocessing import MultiLabelBinarizer, MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -45,6 +45,15 @@ def calculate_director_matrix(text_data):
             director_similarity[i, j] = 1 if movie_to_director[i] == movie_to_director[j] else 0
 
     return director_similarity
+
+def calculate_star_matrix(text_data):
+    star_columns = ['Star1', 'Star2', 'Star3', 'Star4']
+    text_data['Stars'] = text_data[star_columns].apply(lambda row: row.dropna().tolist(), axis=1)
+    mlb = MultiLabelBinarizer()
+    star_matrix = pd.DataFrame(mlb.fit_transform(text_data['Stars']), columns=mlb.classes_, index=text_data.index)
+    star_similarity = star_matrix.dot(star_matrix.T)
+    star_similarity_normalized = MinMaxScaler().fit_transform(star_similarity)
+    return star_similarity
 
 def create_graph(*matrices):
     average_matrix = np.mean(matrices, axis=0)
@@ -154,11 +163,13 @@ if __name__ == "__main__":
     overview_matrix = calculate_overview_matrix(data)
     genre_matrix = calculate_genre_matrix(data)
     director_matrix = calculate_director_matrix(data)
+    star_matrix = calculate_star_matrix(data)
 
     G = create_graph(
             overview_matrix,
             genre_matrix,
-            director_matrix)
+            director_matrix,
+            star_matrix)
 
     perform_clustering(G)
 
