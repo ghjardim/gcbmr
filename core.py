@@ -3,6 +3,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
@@ -26,6 +27,24 @@ def calculate_genre_matrix(text_data):
     genre_matrix = pd.DataFrame(mlb.fit_transform(genres), columns=mlb.classes_, index=text_data.index)
     genre_similarity = cosine_similarity(genre_matrix)
     return genre_similarity
+
+def calculate_director_matrix(text_data):
+    text_data['Director_Label'] = LabelEncoder().fit_transform(text_data['Director'])
+
+    # Mapping of movie indices to director labels
+    movie_to_director = dict(zip(text_data.index, text_data['Director_Label']))
+
+    # Initialize the director similarity matrix with zeros
+    num_movies = len(text_data)
+    director_similarity = np.zeros((num_movies, num_movies))
+
+    # Populate the director similarity matrix
+    for i in range(num_movies):
+        for j in range(num_movies):
+            # If the movies have the same director, set similarity to 1; otherwise, set it to 0
+            director_similarity[i, j] = 1 if movie_to_director[i] == movie_to_director[j] else 0
+
+    return director_similarity
 
 def create_graph(*matrices):
     average_matrix = np.mean(matrices, axis=0)
@@ -134,8 +153,12 @@ if __name__ == "__main__":
 
     overview_matrix = calculate_overview_matrix(data)
     genre_matrix = calculate_genre_matrix(data)
+    director_matrix = calculate_director_matrix(data)
 
-    G = create_graph(overview_matrix, genre_matrix)
+    G = create_graph(
+            overview_matrix,
+            genre_matrix,
+            director_matrix)
 
     perform_clustering(G)
 
