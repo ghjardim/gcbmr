@@ -33,7 +33,7 @@ def create_graph(cosine_sim):
 
 def visualize_graph(G, pos=None, colors=None):
     if pos is None:
-        pos = nx.random_layout(G)
+        pos = nx.spring_layout(G, weight='weight', seed=42)
 
     plt.figure(figsize=(10, 8))
 
