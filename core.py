@@ -27,8 +27,10 @@ def calculate_genre_matrix(text_data):
     genre_similarity = cosine_similarity(genre_matrix)
     return genre_similarity
 
-def create_graph(cosine_sim):
-    G = nx.from_numpy_array(cosine_sim)
+def create_graph(*matrices):
+    average_matrix = np.mean(matrices, axis=0)
+
+    G = nx.from_numpy_array(average_matrix)
 
     # Remove self-loops
     G.remove_edges_from(nx.selfloop_edges(G))
@@ -133,7 +135,7 @@ if __name__ == "__main__":
     overview_matrix = calculate_overview_matrix(data)
     genre_matrix = calculate_genre_matrix(data)
 
-    G = create_graph(genre_matrix)
+    G = create_graph(overview_matrix, genre_matrix)
 
     perform_clustering(G)
 
