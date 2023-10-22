@@ -117,6 +117,21 @@ def get_movie_cluster(movie_title, movie_indices, G):
         print(f"Movie '{movie_title}' not found or not present in the graph.")
         return None
 
+def get_sorted_neighbors(graph, vertex):
+    if vertex in graph:
+        # Get the neighbors of the vertex
+        neighbors = list(graph.neighbors(vertex))
+
+        # Sort the neighbors based on the edge weights in descending order
+        sorted_neighbors = sorted(
+                neighbors,
+                key=lambda neighbor: graph[vertex][neighbor]['weight'], reverse=True)
+
+        return sorted_neighbors
+    else:
+        print(f"Vertex {vertex} is not in the graph.")
+        return None
+
 def get_movies_in_cluster(cluster_number, G):
     cluster_indices = [node for node, data in G.nodes(data=True) if data.get('cluster') == cluster_number]
 
@@ -155,9 +170,17 @@ def analyse():
         num_movies = len(movies_in_cluster)
         print(f" -> {num_movies}")
 
-    print("Movie " + target_movie + " has the following neighbours: " + str(list(G.neighbors(target_movie_index))))
-    print("Movie " + target_movie + " has the following neighbours in cluster " + str(movie_cluster) + ": " + str(list(create_cluster_subgraph(G, movie_cluster).neighbors(target_movie_index))))
-    print("Movie " + target_movie + " got the following Overview TF-IDF recommended movies: " + str(sorted(get_recommended_movies_tfidf(target_movie_index, overview_matrix, data).index.tolist())))
+    print("Movie " + target_movie + " has the following neighbours: " + str(
+        #G.neighbors(target_movie_index)
+        get_sorted_neighbors(G, target_movie_index)
+        ))
+    print("Movie " + target_movie + " has the following neighbours in cluster "
+          + str(movie_cluster) + ": " + str(
+              get_sorted_neighbors(
+                  create_cluster_subgraph(G, movie_cluster),
+                  target_movie_index
+                  )))
+    print("Movie " + target_movie + " got the following TF-IDF recommended movies: " + str(sorted(get_recommended_movies_tfidf(target_movie_index, overview_matrix, data).index.tolist())))
 
     print("Graph: Connected components:\t" + str(len(list(nx.connected_components(G)))))
     for cluster in range(0,10):
