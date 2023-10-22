@@ -55,6 +55,16 @@ def calculate_star_matrix(text_data):
     star_similarity_normalized = MinMaxScaler().fit_transform(star_similarity)
     return star_similarity
 
+def calculate_year_matrix(text_data):
+    released_years = text_data['Released_Year'].values
+    year_differences = np.abs(np.subtract.outer(released_years, released_years))
+
+    def similarity_function(difference):
+        return 1 / (1 + difference)
+
+    year_similarity = np.vectorize(similarity_function)(year_differences)
+    return year_similarity
+
 def create_graph(*matrices):
     average_matrix = np.mean(matrices, axis=0)
 
@@ -164,12 +174,14 @@ if __name__ == "__main__":
     genre_matrix = calculate_genre_matrix(data)
     director_matrix = calculate_director_matrix(data)
     star_matrix = calculate_star_matrix(data)
+    year_matrix = calculate_year_matrix(data)
 
     G = create_graph(
             overview_matrix,
             genre_matrix,
             director_matrix,
-            star_matrix)
+            star_matrix,
+            year_matrix)
 
     perform_clustering(G)
 
