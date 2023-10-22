@@ -65,6 +65,16 @@ def calculate_year_matrix(text_data):
     year_similarity = np.vectorize(similarity_function)(year_differences)
     return year_similarity
 
+def calculate_runtime_matrix(text_data):
+    runtime = text_data['Runtime'].str.replace(' min', '').values.astype(int)
+    runtime_differences = np.abs(np.subtract.outer(runtime, runtime))
+
+    def similarity_function(difference):
+        return 1 / (1 + difference)
+
+    runtime_similarity = np.vectorize(similarity_function)(runtime_differences)
+    return runtime_similarity
+
 def create_graph(*matrices):
     average_matrix = np.mean(matrices, axis=0)
 
@@ -198,13 +208,15 @@ if __name__ == "__main__":
     director_matrix = calculate_director_matrix(data)
     star_matrix = calculate_star_matrix(data)
     year_matrix = calculate_year_matrix(data)
+    runtime_matrix = calculate_runtime_matrix(data)
 
     G = create_graph(
             overview_matrix,
             genre_matrix,
             director_matrix,
             star_matrix,
-            year_matrix)
+            year_matrix,
+            runtime_matrix)
 
     perform_clustering(G)
 
