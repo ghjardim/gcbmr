@@ -9,3 +9,6 @@ share it.
 
 If the authors have problems with this file being here, please submit
 an issue in the repository.
+
+We've modified the original file to get the correct data in some
+columns.
