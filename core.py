@@ -75,10 +75,11 @@ def calculate_runtime_matrix(text_data):
     runtime_similarity = np.vectorize(similarity_function)(runtime_differences)
     return runtime_similarity
 
-def create_graph(*matrices):
-    average_matrix = np.mean(matrices, axis=0)
+def create_graph(*matrix_weight_pairs):
+    matrices, weights = zip(*matrix_weight_pairs)
+    weighted_average_matrix = np.average(matrices, axis=0, weights=weights)
 
-    G = nx.from_numpy_array(average_matrix)
+    G = nx.from_numpy_array(weighted_average_matrix)
 
     # Remove self-loops
     G.remove_edges_from(nx.selfloop_edges(G))
@@ -211,12 +212,13 @@ if __name__ == "__main__":
     runtime_matrix = calculate_runtime_matrix(data)
 
     G = create_graph(
-            overview_matrix,
-            genre_matrix,
-            director_matrix,
-            star_matrix,
-            year_matrix,
-            runtime_matrix)
+            (overview_matrix,   0.4),
+            (genre_matrix,      0.4),
+            (director_matrix,   0.05),
+            (star_matrix,       0.05),
+            (year_matrix,       0.05),
+            (runtime_matrix,    0.05)
+        )
 
     perform_clustering(G)
 
