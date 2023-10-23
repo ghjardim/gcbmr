@@ -164,6 +164,36 @@ def create_cluster_subgraph(G, cluster_number):
 
     return subgraph
 
+def compute_cluster_similarity(G):
+    clusters = set(nx.get_node_attributes(G, 'cluster').values())
+    cluster_weights = {}
+
+    # Step 1: Compute Edge Weights Between Clusters
+    for edge in G.edges(data=True):
+        node1, node2, weight = edge
+        cluster1 = G.nodes[node1].get('cluster')
+        cluster2 = G.nodes[node2].get('cluster')
+
+        if cluster1 is not None and cluster2 is not None and cluster1 != cluster2:
+            key = tuple(sorted([cluster1, cluster2]))
+            cluster_weights[key] = cluster_weights.get(key, 0) + weight['weight']
+
+    # Step 2: Normalize the Weights
+    max_weight = max(cluster_weights.values())
+    cluster_weights_normalized = {key: value / max_weight for key, value in cluster_weights.items()}
+
+    # Step 3: Create a Cluster Similarity Matrix
+    num_clusters = len(clusters)
+    cluster_similarity_matrix = np.zeros((num_clusters, num_clusters))
+
+    for i, cluster_i in enumerate(clusters):
+        for j, cluster_j in enumerate(clusters):
+            if i != j:
+                key = tuple(sorted([cluster_i, cluster_j]))
+                cluster_similarity_matrix[i, j] = cluster_weights_normalized.get(key, 0)
+
+    return cluster_similarity_matrix
+
 def analyse():
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
     movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
@@ -221,5 +251,6 @@ if __name__ == "__main__":
         )
 
     perform_clustering(G)
+    cluster_similarity_matrix = compute_cluster_similarity(G)
 
     analyse()
