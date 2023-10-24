@@ -194,6 +194,13 @@ def compute_cluster_similarity(G):
 
     return cluster_similarity_matrix
 
+def get_most_similar_cluster(movie_cluster, cluster_similarity_matrix):
+    sorted_clusters_by_similarity = sorted(enumerate(
+        cluster_similarity_matrix[movie_cluster]), key=lambda x: x[1], reverse=True)
+    sorted_indices = [t[0] for t in sorted_clusters_by_similarity]
+    most_similar_cluster = sorted_indices[0]
+    return most_similar_cluster
+
 def analyse():
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
     movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
@@ -230,6 +237,8 @@ def analyse():
         print("Cluster " + str(cluster)
               + "\tConnected components:" + str(len(list(nx.connected_components(cluster_subgraph))))
               + "\tNodes:" + str(cluster_subgraph.number_of_nodes()))
+
+    print("Most similar cluster: ", get_most_similar_cluster(movie_cluster, cluster_similarity_matrix))
 
 if __name__ == "__main__":
     data = load_data("./dataset/imdb_top_1000.csv")
