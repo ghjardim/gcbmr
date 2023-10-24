@@ -114,11 +114,6 @@ def perform_clustering(G, num_clusters=10):
 def get_films_by_name(movie_name, movie_indices):
     return movie_indices[movie_indices.index.str.contains(movie_name, na=False)]
 
-def get_recommended_movies_tfidf(target_movie_index, movie_similarities, movies_df):
-    similarity_scores = pd.DataFrame(movie_similarities[target_movie_index], columns=["score"])
-    movie_indices = similarity_scores.sort_values("score", ascending=False)[1:11].index
-    return movies_df['Series_Title'].iloc[movie_indices]
-
 def get_movie_cluster(movie_title, movie_indices, G):
     movie_index = movie_indices.get(movie_title)
 
@@ -248,12 +243,15 @@ if __name__ == "__main__":
     similar_subgraph_with_target = include_target_movie_in_cluster_subgraph(G, similar_cluster_subgraph, target_movie_index)
     neighbours_in_similar_cluster = get_sorted_neighbors(similar_subgraph_with_target, target_movie_index)
 
-    visualize_graph(create_cluster_subgraph(G, movie_cluster))
-    visualize_graph(similar_cluster_subgraph)
-    visualize_graph(similar_subgraph_with_target)
+    #visualize_graph(create_cluster_subgraph(G, movie_cluster))
+    #visualize_graph(similar_cluster_subgraph)
+    #visualize_graph(similar_subgraph_with_target)
 
     print("Movie:", target_movie)
-    print("---")
-    print("Recommended movies:", str(neighbours_in_cluster[0:10]))
-    print("Try also:", str(neighbours_in_similar_cluster[0:10]))
+    print()
+    print("Recommended movies:")
+    print(data['Series_Title'].iloc[neighbours_in_cluster[0:15]])
+    print()
+    print("Try also:")
+    print(data['Series_Title'].iloc[neighbours_in_similar_cluster[0:15]])
 
