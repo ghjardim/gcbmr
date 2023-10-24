@@ -216,8 +216,8 @@ if __name__ == "__main__":
     runtime_matrix = calculate_runtime_matrix(data)
 
     G = create_graph(
-            (overview_matrix,   0.4),
-            (genre_matrix,      0.4),
+            (overview_matrix,   0.6),
+            (genre_matrix,      0.2),
             (director_matrix,   0.05),
             (star_matrix,       0.05),
             (year_matrix,       0.05),
