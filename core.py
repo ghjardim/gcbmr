@@ -210,7 +210,28 @@ def include_target_movie_in_cluster_subgraph(G, subgraph, target_movie):
 
     return new_subgraph
 
-def analyze():
+if __name__ == "__main__":
+    data = load_data("./dataset/imdb_top_1000.csv")
+
+    overview_matrix = calculate_overview_matrix(data)
+    genre_matrix = calculate_genre_matrix(data)
+    director_matrix = calculate_director_matrix(data)
+    star_matrix = calculate_star_matrix(data)
+    year_matrix = calculate_year_matrix(data)
+    runtime_matrix = calculate_runtime_matrix(data)
+
+    G = create_graph(
+            (overview_matrix,   0.4),
+            (genre_matrix,      0.4),
+            (director_matrix,   0.05),
+            (star_matrix,       0.05),
+            (year_matrix,       0.05),
+            (runtime_matrix,    0.05)
+        )
+
+    perform_clustering(G)
+    cluster_similarity_matrix = compute_cluster_similarity(G)
+
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
     movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
 
@@ -236,26 +257,3 @@ def analyze():
     print("Recommended movies:", str(neighbours_in_cluster[0:10]))
     print("Try also:", str(neighbours_in_similar_cluster[0:10]))
 
-if __name__ == "__main__":
-    data = load_data("./dataset/imdb_top_1000.csv")
-
-    overview_matrix = calculate_overview_matrix(data)
-    genre_matrix = calculate_genre_matrix(data)
-    director_matrix = calculate_director_matrix(data)
-    star_matrix = calculate_star_matrix(data)
-    year_matrix = calculate_year_matrix(data)
-    runtime_matrix = calculate_runtime_matrix(data)
-
-    G = create_graph(
-            (overview_matrix,   0.4),
-            (genre_matrix,      0.4),
-            (director_matrix,   0.05),
-            (star_matrix,       0.05),
-            (year_matrix,       0.05),
-            (runtime_matrix,    0.05)
-        )
-
-    perform_clustering(G)
-    cluster_similarity_matrix = compute_cluster_similarity(G)
-
-    analyze()
