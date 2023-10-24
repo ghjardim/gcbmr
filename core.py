@@ -1,5 +1,5 @@
 import pandas as pd
-import calculate_similarity_matrixes
+import calculate_similarity_matrixes as calc_sim
 import clustering
 import plot_graph
 
@@ -15,12 +15,12 @@ def get_films_by_name(movie_name, movie_indices):
 if __name__ == "__main__":
     data = load_data("./dataset/imdb_top_1000.csv")
 
-    overview_matrix = calculate_similarity_matrixes.calculate_overview_matrix(data)
-    genre_matrix = calculate_similarity_matrixes.calculate_genre_matrix(data)
-    director_matrix = calculate_similarity_matrixes.calculate_director_matrix(data)
-    star_matrix = calculate_similarity_matrixes.calculate_star_matrix(data)
-    year_matrix = calculate_similarity_matrixes.calculate_year_matrix(data)
-    runtime_matrix = calculate_similarity_matrixes.calculate_runtime_matrix(data)
+    overview_matrix = calc_sim.calculate_overview_matrix(data)
+    genre_matrix = calc_sim.calculate_genre_matrix(data)
+    director_matrix = calc_sim.calculate_director_matrix(data)
+    star_matrix = calc_sim.calculate_star_matrix(data)
+    year_matrix = calc_sim.calculate_year_matrix(data)
+    runtime_matrix = calc_sim.calculate_runtime_matrix(data)
 
     G = plot_graph.create_graph(
             (overview_matrix,   0.6),
