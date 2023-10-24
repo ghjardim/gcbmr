@@ -201,6 +201,15 @@ def get_most_similar_cluster(movie_cluster, cluster_similarity_matrix):
     most_similar_cluster = sorted_indices[0]
     return most_similar_cluster
 
+def include_target_movie_in_cluster_subgraph(G, subgraph, target_movie):
+    new_subgraph = subgraph.copy()
+
+    new_subgraph.add_node(target_movie)
+    target_movie_edges = [(target_movie, neighbor, data) for neighbor, data in G[target_movie].items() if neighbor in subgraph]
+    new_subgraph.add_edges_from(target_movie_edges)
+
+    return new_subgraph
+
 def analyze():
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
     movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
@@ -210,20 +219,22 @@ def analyze():
 
     movie_cluster = get_movie_cluster(target_movie, movie_indices, G)
     movies_in_cluster = get_movies_in_cluster(movie_cluster, G)
-    neighbours_in_cluster = get_sorted_neighbors(
-            create_cluster_subgraph(G, movie_cluster),
-            target_movie_index)
+    movie_cluster_subgraph = create_cluster_subgraph(G, movie_cluster)
+    neighbours_in_cluster = get_sorted_neighbors(movie_cluster_subgraph, target_movie_index)
+
     most_similar_cluster = get_most_similar_cluster(movie_cluster, cluster_similarity_matrix)
+    similar_cluster_subgraph = create_cluster_subgraph(G, most_similar_cluster)
+    similar_subgraph_with_target = include_target_movie_in_cluster_subgraph(G, similar_cluster_subgraph, target_movie_index)
+    neighbours_in_similar_cluster = get_sorted_neighbors(similar_subgraph_with_target, target_movie_index)
 
-    for cluster in range(0,10):
-        cluster_subgraph = create_cluster_subgraph(G, cluster)
-        print("Cluster " + str(cluster)
-              + "\tConnected components:" + str(len(list(nx.connected_components(cluster_subgraph))))
-              + "\tNodes:" + str(cluster_subgraph.number_of_nodes()))
+    visualize_graph(create_cluster_subgraph(G, movie_cluster))
+    visualize_graph(similar_cluster_subgraph)
+    visualize_graph(similar_subgraph_with_target)
 
+    print("Movie:", target_movie)
     print("---")
     print("Recommended movies:", str(neighbours_in_cluster[0:10]))
-    print("Try also:", "movies from cluster", str(most_similar_cluster))
+    print("Try also:", str(neighbours_in_similar_cluster[0:10]))
 
 if __name__ == "__main__":
     data = load_data("./dataset/imdb_top_1000.csv")
