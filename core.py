@@ -201,7 +201,7 @@ def get_most_similar_cluster(movie_cluster, cluster_similarity_matrix):
     most_similar_cluster = sorted_indices[0]
     return most_similar_cluster
 
-def analyse():
+def analyze():
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
     movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
 
@@ -209,36 +209,21 @@ def analyse():
     target_movie_index = movie_indices[target_movie]
 
     movie_cluster = get_movie_cluster(target_movie, movie_indices, G)
-    if movie_cluster is not None:
-        print(f"The cluster of the movie '{target_movie}' is: {movie_cluster}")
-
     movies_in_cluster = get_movies_in_cluster(movie_cluster, G)
-    if movies_in_cluster is not None:
-        print(f"Movies in Cluster {movie_cluster}: {movies_in_cluster}", end="")
-        num_movies = len(movies_in_cluster)
-        print(f" -> {num_movies}")
+    neighbours_in_cluster = get_sorted_neighbors(
+            create_cluster_subgraph(G, movie_cluster),
+            target_movie_index)
+    most_similar_cluster = get_most_similar_cluster(movie_cluster, cluster_similarity_matrix)
 
-    print("Movie " + target_movie + " has the following neighbours: " + str(
-        #G.neighbors(target_movie_index)
-        get_sorted_neighbors(G, target_movie_index)
-        ))
-    print("Movie " + target_movie + " has the following neighbours in cluster "
-          + str(movie_cluster) + ": " + str(
-              get_sorted_neighbors(
-                  create_cluster_subgraph(G, movie_cluster),
-                  target_movie_index
-                  )))
-    print("Movie " + target_movie + " got the following TF-IDF recommended movies: " + str(sorted(get_recommended_movies_tfidf(target_movie_index, overview_matrix, data).index.tolist())))
-
-    print("Graph: Connected components:\t" + str(len(list(nx.connected_components(G)))))
     for cluster in range(0,10):
         cluster_subgraph = create_cluster_subgraph(G, cluster)
-        #visualize_graph(cluster_subgraph)
         print("Cluster " + str(cluster)
               + "\tConnected components:" + str(len(list(nx.connected_components(cluster_subgraph))))
               + "\tNodes:" + str(cluster_subgraph.number_of_nodes()))
 
-    print("Most similar cluster: ", get_most_similar_cluster(movie_cluster, cluster_similarity_matrix))
+    print("---")
+    print("Recommended movies:", str(neighbours_in_cluster[0:10]))
+    print("Try also:", "movies from cluster", str(most_similar_cluster))
 
 if __name__ == "__main__":
     data = load_data("./dataset/imdb_top_1000.csv")
@@ -262,4 +247,4 @@ if __name__ == "__main__":
     perform_clustering(G)
     cluster_similarity_matrix = compute_cluster_similarity(G)
 
-    analyse()
+    analyze()
