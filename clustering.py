@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 
 def get_movie_cluster(movie_title, movie_indices, G):
     movie_index = movie_indices.get(movie_title)

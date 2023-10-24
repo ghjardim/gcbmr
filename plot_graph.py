@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+import numpy as np
 
 def create_graph(*matrix_weight_pairs):
     matrices, weights = zip(*matrix_weight_pairs)
