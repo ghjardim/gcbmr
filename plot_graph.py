@@ -1,6 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 import numpy as np
 
 def create_graph(*matrix_weight_pairs):
@@ -40,10 +40,15 @@ def create_cluster_subgraph(G, cluster_number):
 
     return subgraph
 
-def perform_clustering(G, num_clusters=10):
+def perform_clustering(G, method="kmeans", num_clusters=10, distance_threshold=0.5):
     adjacency_matrix = nx.adjacency_matrix(G).toarray()
-    kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=20)
-    cluster_labels = kmeans.fit_predict(adjacency_matrix)
+
+    if method == "kmeans":
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=20)
+        cluster_labels = kmeans.fit_predict(adjacency_matrix)
+    elif method == "agglomerative":
+        agglomerative = AgglomerativeClustering(n_clusters=num_clusters, metric='precomputed', linkage='complete')
+        cluster_labels = agglomerative.fit_predict(adjacency_matrix)
 
     for node, label in enumerate(cluster_labels):
         G.nodes[node]['cluster'] = label

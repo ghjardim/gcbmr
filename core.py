@@ -31,13 +31,14 @@ if __name__ == "__main__":
             (runtime_matrix,    0.05)
         )
 
-    plot_graph.perform_clustering(G)
+    plot_graph.perform_clustering(G, method="kmeans")
+    #plot_graph.perform_clustering(G, method="agglomerative")
     cluster_similarity_matrix = clustering.compute_cluster_similarity(G)
 
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
     movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
 
-    target_movie = "Inception"
+    target_movie = "Harry Potter and the Deathly Hallows: Part 1"
     target_movie_index = movie_indices[target_movie]
 
     movie_cluster = clustering.get_movie_cluster(target_movie, movie_indices, G)
