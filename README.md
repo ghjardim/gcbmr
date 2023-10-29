@@ -1,1 +1,10 @@
 # GCBMR: Graph Clustering-Based Movie Recommendation
+
+## How to run the project
+
+Run the following commands on your terminal
+
+`python3 -m venv venv`
+`source venv/bin/activate`
+`pip3 install -r requirements.txt`
+`python3 core.py`
