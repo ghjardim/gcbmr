@@ -1,55 +1,64 @@
 import pandas as pd
-import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
+import calculate_similarity_matrixes as calc_sim
+import clustering
+import plot_graph
 
-# Importing data
-data = pd.read_csv("./dataset/imdb_top_1000.csv", na_values = "?")
-
-# Removing unimportant columns
-del data['Poster_Link']
-del data['Meta_score']
-del data['Certificate']
-del data['Gross']
-
-# Start TF-IDF
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-tfidf = TfidfVectorizer(stop_words='english')
-data['Overview'] = data['Overview'].fillna('')
-tfidf_matrix = tfidf.fit_transform(data['Overview'])
-
-cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
-indices = pd.Series(data.index, index=data['Series_Title'])
-indices = indices[~indices.index.duplicated(keep='last')]
+def load_data(file_path):
+    data = pd.read_csv(file_path, na_values="?")
+    columns_to_remove = ['Poster_Link', 'Meta_score', 'Certificate', 'Gross']
+    data.drop(columns=columns_to_remove, inplace=True)
+    return data
 
 def get_films_by_name(movie_name, movie_indices):
     return movie_indices[movie_indices.index.str.contains(movie_name, na=False)]
-def get_recommended_movies_tfidf(target_movie_index, movie_similarities,movies_df):
-    similarity_scores = pd.DataFrame(movie_similarities[target_movie_index], columns=["score"])
-    movie_indices = similarity_scores.sort_values("score", ascending=False)[1:11].index
-    return data['Series_Title'].iloc[movie_indices]
 
-# Creating adjacency matrix
-adjacency_matrix = cosine_sim
+if __name__ == "__main__":
+    data = load_data("./dataset/imdb_top_1000.csv")
 
-# Creating the graph
-G = nx.Graph()
-num_nodes = cosine_sim.shape[0]
-G.add_nodes_from(range(num_nodes))
+    overview_matrix = calc_sim.calculate_overview_matrix(data)
+    genre_matrix = calc_sim.calculate_genre_matrix(data)
+    director_matrix = calc_sim.calculate_director_matrix(data)
+    star_matrix = calc_sim.calculate_star_matrix(data)
+    year_matrix = calc_sim.calculate_year_matrix(data)
+    runtime_matrix = calc_sim.calculate_runtime_matrix(data)
 
-for i in range(num_nodes):
-    for j in range(i + 1, num_nodes):
-        if adjacency_matrix[i, j] == 1:
-            similarity_weight = cosine_sim[i, j]
-            G.add_edge(i, j, weight=similarity_weight)
+    G = plot_graph.create_graph(
+            (overview_matrix,   0.6),
+            (genre_matrix,      0.2),
+            (director_matrix,   0.05),
+            (star_matrix,       0.05),
+            (year_matrix,       0.05),
+            (runtime_matrix,    0.05)
+        )
 
-pos = nx.random_layout(G)
-nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=2, font_size=8, width=0.5)
-labels = nx.get_edge_attributes(G, 'weight')
-nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, font_size=8)
-plt.show()
+    plot_graph.perform_clustering(G)
+    cluster_similarity_matrix = clustering.compute_cluster_similarity(G)
 
-print("Number of elements equal to zero:", np.count_nonzero(adjacency_matrix == 0))
-print("Number of elements not equal to zero:", np.count_nonzero(adjacency_matrix != 0))
+    movie_indices = pd.Series(data.index, index=data['Series_Title'])
+    movie_indices = movie_indices[~movie_indices.index.duplicated(keep='last')]
+
+    target_movie = "Inception"
+    target_movie_index = movie_indices[target_movie]
+
+    movie_cluster = clustering.get_movie_cluster(target_movie, movie_indices, G)
+    movies_in_cluster = clustering.get_movies_in_cluster(movie_cluster, G)
+    movie_cluster_subgraph = clustering.create_cluster_subgraph(G, movie_cluster)
+    neighbours_in_cluster = clustering.get_sorted_neighbors(movie_cluster_subgraph, target_movie_index)
+
+    most_similar_cluster = clustering.get_most_similar_cluster(movie_cluster, cluster_similarity_matrix)
+    similar_cluster_subgraph = clustering.create_cluster_subgraph(G, most_similar_cluster)
+    similar_subgraph_with_target = clustering.include_target_movie_in_cluster_subgraph(G, similar_cluster_subgraph, target_movie_index)
+    neighbours_in_similar_cluster = clustering.get_sorted_neighbors(similar_subgraph_with_target, target_movie_index)
+
+    #visualize_graph(create_cluster_subgraph(G, movie_cluster))
+    #visualize_graph(similar_cluster_subgraph)
+    #visualize_graph(similar_subgraph_with_target)
+
+    print("Movie:", target_movie)
+    print()
+    print("Recommended movies:")
+    print(data['Series_Title'].iloc[neighbours_in_cluster[0:15]])
+    print()
+    print("Try also:")
+    print(data['Series_Title'].iloc[neighbours_in_similar_cluster[0:15]])
+
