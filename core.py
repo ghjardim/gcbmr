@@ -31,7 +31,7 @@ if __name__ == "__main__":
             (runtime_matrix,    0.05)
         )
 
-    plot_graph.perform_clustering(G)
+    clustering.perform_clustering(G)
     cluster_similarity_matrix = clustering.compute_cluster_similarity(G)
 
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
