@@ -31,7 +31,7 @@ if __name__ == "__main__":
             (runtime_matrix,    0.05)
         )
 
-    plot_graph.perform_clustering(G)
+    clustering.perform_clustering(G)
     cluster_similarity_matrix = clustering.compute_cluster_similarity(G)
 
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
@@ -42,11 +42,11 @@ if __name__ == "__main__":
 
     movie_cluster = clustering.get_movie_cluster(target_movie, movie_indices, G)
     movies_in_cluster = clustering.get_movies_in_cluster(movie_cluster, G)
-    movie_cluster_subgraph = plot_graph.create_cluster_subgraph(G, movie_cluster)
+    movie_cluster_subgraph = clustering.create_cluster_subgraph(G, movie_cluster)
     neighbours_in_cluster = clustering.get_sorted_neighbors(movie_cluster_subgraph, target_movie_index)
 
     most_similar_cluster = clustering.get_most_similar_cluster(movie_cluster, cluster_similarity_matrix)
-    similar_cluster_subgraph = plot_graph.create_cluster_subgraph(G, most_similar_cluster)
+    similar_cluster_subgraph = clustering.create_cluster_subgraph(G, most_similar_cluster)
     similar_subgraph_with_target = clustering.include_target_movie_in_cluster_subgraph(G, similar_cluster_subgraph, target_movie_index)
     neighbours_in_similar_cluster = clustering.get_sorted_neighbors(similar_subgraph_with_target, target_movie_index)
 
