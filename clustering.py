@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 import plot_graph
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 
 def get_movie_cluster(movie_title, movie_indices, G):
     movie_index = movie_indices.get(movie_title)
@@ -94,10 +94,15 @@ def create_cluster_subgraph(G, cluster_number):
 
     return subgraph
 
-def perform_clustering(G, num_clusters=10):
+def perform_clustering(G, method="kmeans", num_clusters=10, distance_threshold=0.5):
     adjacency_matrix = nx.adjacency_matrix(G).toarray()
-    kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=20)
-    cluster_labels = kmeans.fit_predict(adjacency_matrix)
+
+    if method == "kmeans":
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=20)
+        cluster_labels = kmeans.fit_predict(adjacency_matrix)
+    elif method == "agglomerative":
+        agglomerative = AgglomerativeClustering(n_clusters=num_clusters, metric='precomputed', linkage='complete')
+        cluster_labels = agglomerative.fit_predict(adjacency_matrix)
 
     for node, label in enumerate(cluster_labels):
         G.nodes[node]['cluster'] = label
