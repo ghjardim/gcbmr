@@ -2,17 +2,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
-def create_graph(*matrix_weight_pairs):
-    matrices, weights = zip(*matrix_weight_pairs)
-    weighted_average_matrix = np.average(matrices, axis=0, weights=weights)
-
-    G = nx.from_numpy_array(weighted_average_matrix)
-
-    # Remove self-loops
-    G.remove_edges_from(nx.selfloop_edges(G))
-
-    return G
-
 def visualize_graph(G, pos=None, colors=None):
     if pos is None:
         pos = nx.spring_layout(G, weight='weight', seed=42)

@@ -22,7 +22,7 @@ if __name__ == "__main__":
     year_matrix = calc_sim.calculate_year_matrix(data)
     runtime_matrix = calc_sim.calculate_runtime_matrix(data)
 
-    G = plot_graph.create_graph(
+    G = calc_sim.create_graph(
             (overview_matrix,   0.6),
             (genre_matrix,      0.2),
             (director_matrix,   0.05),
