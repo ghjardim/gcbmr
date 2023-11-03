@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import networkx as nx
 from sklearn.preprocessing import MultiLabelBinarizer, MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -65,3 +66,15 @@ def calculate_runtime_matrix(text_data):
 
     runtime_similarity = np.vectorize(similarity_function)(runtime_differences)
     return runtime_similarity
+
+def create_graph(*matrix_weight_pairs):
+    matrices, weights = zip(*matrix_weight_pairs)
+    weighted_average_matrix = np.average(matrices, axis=0, weights=weights)
+
+    G = nx.from_numpy_array(weighted_average_matrix)
+
+    # Remove self-loops
+    G.remove_edges_from(nx.selfloop_edges(G))
+
+    return G
+
