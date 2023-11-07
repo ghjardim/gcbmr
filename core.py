@@ -34,6 +34,9 @@ if __name__ == "__main__":
     clustering.perform_clustering(G, method="kmeans")
     #clustering.perform_clustering(G, method="agglomerative")
 
+    plot_graph.visualize_graph(G, color=True)
+    plot_graph.visualize_graph_clusters(G, color=True)
+
     cluster_similarity_matrix = clustering.compute_cluster_similarity(G)
 
     movie_indices = pd.Series(data.index, index=data['Series_Title'])

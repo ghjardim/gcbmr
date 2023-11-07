@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-import plot_graph
 from sklearn.cluster import KMeans, AgglomerativeClustering
 
 def get_movie_cluster(movie_title, movie_indices, G):
@@ -106,6 +105,3 @@ def perform_clustering(G, method="kmeans", num_clusters=10, distance_threshold=0
 
     for node, label in enumerate(cluster_labels):
         G.nodes[node]['cluster'] = label
-
-    colors = [G.nodes[node]['cluster'] for node in G.nodes]
-    plot_graph.visualize_graph(G, colors=colors)
