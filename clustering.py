@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-import plot_graph
 from sklearn.cluster import KMeans, AgglomerativeClustering
 
 def get_movie_cluster(movie_title, movie_indices, G):
@@ -76,7 +75,7 @@ def get_most_similar_cluster(movie_cluster, cluster_similarity_matrix):
 def include_target_movie_in_cluster_subgraph(G, subgraph, target_movie):
     new_subgraph = subgraph.copy()
 
-    new_subgraph.add_node(target_movie)
+    new_subgraph.add_node(target_movie, **G.nodes[target_movie])
     target_movie_edges = [(target_movie, neighbor, data) for neighbor, data in G[target_movie].items() if neighbor in subgraph]
     new_subgraph.add_edges_from(target_movie_edges)
 
@@ -106,6 +105,3 @@ def perform_clustering(G, method="kmeans", num_clusters=10, distance_threshold=0
 
     for node, label in enumerate(cluster_labels):
         G.nodes[node]['cluster'] = label
-
-    colors = [G.nodes[node]['cluster'] for node in G.nodes]
-    plot_graph.visualize_graph(G, colors=colors)

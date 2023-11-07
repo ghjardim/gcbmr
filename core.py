@@ -34,6 +34,9 @@ if __name__ == "__main__":
     clustering.perform_clustering(G, method="kmeans")
     #clustering.perform_clustering(G, method="agglomerative")
 
+    plot_graph.visualize_graph(G, color=True)
+    plot_graph.visualize_graph_clusters(G, color=True)
+
     cluster_similarity_matrix = clustering.compute_cluster_similarity(G)
 
     movie_indices = pd.Series(data.index, index=data['Series_Title'])
@@ -52,9 +55,9 @@ if __name__ == "__main__":
     similar_subgraph_with_target = clustering.include_target_movie_in_cluster_subgraph(G, similar_cluster_subgraph, target_movie_index)
     neighbours_in_similar_cluster = clustering.get_sorted_neighbors(similar_subgraph_with_target, target_movie_index)
 
-    #visualize_graph(create_cluster_subgraph(G, movie_cluster))
-    #visualize_graph(similar_cluster_subgraph)
-    #visualize_graph(similar_subgraph_with_target)
+    plot_graph.visualize_graph(movie_cluster_subgraph, color=True)
+    plot_graph.visualize_graph(similar_cluster_subgraph, color=True)
+    plot_graph.visualize_graph(similar_subgraph_with_target, color=True)
 
     print("Movie:", target_movie)
     print()
