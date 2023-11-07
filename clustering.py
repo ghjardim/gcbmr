@@ -75,7 +75,7 @@ def get_most_similar_cluster(movie_cluster, cluster_similarity_matrix):
 def include_target_movie_in_cluster_subgraph(G, subgraph, target_movie):
     new_subgraph = subgraph.copy()
 
-    new_subgraph.add_node(target_movie)
+    new_subgraph.add_node(target_movie, **G.nodes[target_movie])
     target_movie_edges = [(target_movie, neighbor, data) for neighbor, data in G[target_movie].items() if neighbor in subgraph]
     new_subgraph.add_edges_from(target_movie_edges)
 
